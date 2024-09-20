@@ -19,6 +19,7 @@ end
 function M.input(opts, on_confirm, win_config)
 	local prompt = opts.prompt or "Input: "
 	local default = opts.default or ""
+	on_confirm = on_confirm or function() end
 
 	-- Calculate a minimal width with a bit buffer
 	local default_width = vim.str_utfindex(default) + 10
@@ -56,18 +57,20 @@ function M.input(opts, on_confirm, win_config)
 	-- Enter to confirm
 	vim.keymap.set({ "n", "i", "v" }, "<cr>", function()
 		local lines = vim.api.nvim_buf_get_lines(buffer, 0, 1, false)
-		if lines[1] ~= default and on_confirm then
-			on_confirm(lines[1])
-		end
-		vim.api.nvim_win_close(window, true)
 		vim.cmd("stopinsert")
+		on_confirm(lines[1])
+		vim.api.nvim_win_close(window, true)
 	end, { buffer = buffer })
 
 	-- Esc or q to close
 	vim.keymap.set("n", "<esc>", function()
+		on_confirm(nil)
+		vim.cmd("stopinsert")
 		vim.api.nvim_win_close(window, true)
 	end, { buffer = buffer })
 	vim.keymap.set("n", "q", function()
+		on_confirm(nil)
+		vim.cmd("stopinsert")
 		vim.api.nvim_win_close(window, true)
 	end, { buffer = buffer })
 end
