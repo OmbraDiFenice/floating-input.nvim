@@ -2,9 +2,9 @@ local M = {}
 
 function M.window_center(input_width)
 	return {
-		relative = "win",
-		row = vim.api.nvim_win_get_height(0) / 2 - 1,
-		col = vim.api.nvim_win_get_width(0) / 2 - input_width / 2,
+		relative = "editor",
+		row = vim.o.lines / 2 - 1,
+		col = vim.o.columns / 2 - input_width / 2,
 	}
 end
 
@@ -35,15 +35,15 @@ function M.input(opts, on_confirm, win_config)
 		title = prompt,
 	}
 
-	-- Apply user's window config.
-	win_config = vim.tbl_deep_extend("force", default_win_config, win_config)
-
 	-- Place the window near cursor or at the center of the window.
 	if prompt == "New Name: " then
-		win_config = vim.tbl_deep_extend("force", win_config, M.under_cursor(win_config.width))
+		default_win_config = vim.tbl_deep_extend("force", default_win_config, M.under_cursor(input_width))
 	else
-		win_config = vim.tbl_deep_extend("force", win_config, M.window_center(win_config.width))
+		default_win_config = vim.tbl_deep_extend("force", default_win_config, M.window_center(input_width))
 	end
+
+	-- Apply user's window config.
+	win_config = vim.tbl_deep_extend("force", default_win_config, win_config)
 
 	-- Create floating window.
 	local buffer = vim.api.nvim_create_buf(false, true)
